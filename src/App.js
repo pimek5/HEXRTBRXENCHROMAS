@@ -170,22 +170,37 @@ function App() {
         ? "http://localhost:3000/"
         : "https://pimek5.github.io/HEXRTBRXENCHROMAS/";
 
-      // Exchange code for user info via Railway backend
-      const requestUrl = `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-      console.log('Making Discord auth request to:', requestUrl);
-      
-      fetch(requestUrl)
-        .then(res => {
-          console.log('Response status:', res.status);
-          console.log('Response headers:', res.headers);
-          if (!res.ok) {
-            return res.text().then(text => {
-              console.error('Response body:', text);
-              throw new Error(`HTTP error! status: ${res.status}, body: ${text}`);
-            });
+      // Try multiple backend endpoints
+      const backendUrls = [
+        `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`,
+        `https://radiant-integrity-production.up.railway.app/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`
+      ];
+
+      const tryBackend = async (urls, index = 0) => {
+        if (index >= urls.length) {
+          throw new Error('All backend endpoints failed');
+        }
+
+        const url = urls[index];
+        console.log(`Trying backend ${index + 1}/${urls.length}:`, url);
+
+        try {
+          const response = await fetch(url);
+          console.log(`Backend ${index + 1} response status:`, response.status);
+          
+          if (response.ok) {
+            return await response.json();
+          } else {
+            console.log(`Backend ${index + 1} failed with status ${response.status}, trying next...`);
+            return await tryBackend(urls, index + 1);
           }
-          return res.json();
-        })
+        } catch (error) {
+          console.log(`Backend ${index + 1} error:`, error.message, 'trying next...');
+          return await tryBackend(urls, index + 1);
+        }
+      };
+
+      tryBackend(backendUrls)
         .then(data => {
           console.log('Discord auth response:', data);
           if (data.error) {

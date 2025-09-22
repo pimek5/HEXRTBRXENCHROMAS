@@ -1,58 +1,123 @@
 const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
-const path = require('path');
-require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
+console.log('=== SERVER STARTING ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('PORT:', PORT);
+
+// Simple CORS
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://pimek5.github.io',
-    'https://pimek5.github.io/HEXRTBRXENCHROMAS'
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  origin: '*',
+  methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 
-// Additional CORS headers for preflight requests
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
+// Discord OAuth configuration
+const CLIENT_ID = '1274276113660645389';
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+
+console.log('CLIENT_ID:', CLIENT_ID);
+console.log('CLIENT_SECRET configured:', !!CLIENT_SECRET);
+
+// Health endpoint
+app.get('/health', (req, res) => {
+  console.log('=== HEALTH CHECK ===');
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    client_secret_configured: !!CLIENT_SECRET,
+    version: '3.0.0'
+  });
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  console.log('=== API TEST ===');
+  res.json({ 
+    message: 'API working!', 
+    timestamp: new Date().toISOString(),
+    env: {
+      client_id: !!CLIENT_ID,
+      client_secret: !!CLIENT_SECRET
+    }
+  });
+});
+
+// Discord OAuth endpoint
+app.get('/api/auth/discord', async (req, res) => {
+  console.log('=== DISCORD OAUTH ===');
+  console.log('Query:', req.query);
+  
+  const { code, redirect_uri } = req.query;
+  
+  if (!code) {
+    console.log('ERROR: No code');
+    return res.status(400).json({ error: 'No code' });
+  }
+  
+  if (!CLIENT_SECRET) {
+    console.log('ERROR: No client secret');
+    return res.status(500).json({ error: 'No client secret' });
+  }
+  
+  try {
+    console.log('Exchanging code...');
+    
+    const tokenResponse = await axios.post('https://discord.com/api/v10/oauth2/token', 
+      new URLSearchParams({
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/'
+      }),
+      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
+    );
+
+    console.log('Token response status:', tokenResponse.status);
+    const { access_token, token_type } = tokenResponse.data;
+
+    const userResponse = await axios.get('https://discord.com/api/v10/users/@me', {
+      headers: { 'Authorization': `${token_type} ${access_token}` }
+    });
+
+    const user = userResponse.data;
+    console.log('SUCCESS: User', user.username);
+
+    res.json({
+      id: user.id,
+      username: user.username,
+      discriminator: user.discriminator,
+      avatar: user.avatar,
+      email: user.email,
+      verified: user.verified
+    });
+
+  } catch (error) {
+    console.error('OAUTH ERROR:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Auth failed', details: error.response?.data });
   }
 });
 
-// Serve static files from the React app build directory
-app.use(express.static(path.join(__dirname, 'build')));
+// 404 handler
+app.use('*', (req, res) => {
+  console.log('404:', req.method, req.originalUrl);
+  res.status(404).json({ error: '404 Not Found', path: req.originalUrl });
+});
 
-// Environment validation
-const requiredEnvVars = ['CLIENT_ID', 'CLIENT_SECRET'];
-const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
-
-if (missingEnvVars.length > 0) {
-  console.error('❌ Missing required environment variables:', missingEnvVars);
-  console.log('Please set the following environment variables:');
-  missingEnvVars.forEach(varName => {
-    console.log(`  ${varName}=your_${varName.toLowerCase()}_here`);
-  });
-} else {
-  console.log('✅ All required environment variables are set');
-}
-
-// Discord OAuth configuration
-const DISCORD_CLIENT_ID = process.env.CLIENT_ID || '1274276113660645389';
-const DISCORD_CLIENT_SECRET = process.env.CLIENT_SECRET;
-const DISCORD_API_BASE = 'https://discord.com/api/v10';
+app.listen(PORT, () => {
+  console.log('=== SERVER READY ===');
+  console.log(`Port: ${PORT}`);
+  console.log(`Health: /health`);
+  console.log(`Test: /api/test`);
+  console.log(`OAuth: /api/auth/discord`);
+});
 
 // Health check endpoint
 app.get('/health', (req, res) => {
