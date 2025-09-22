@@ -165,7 +165,18 @@ function App() {
       setAuthError(null);
 
       // Exchange code for user info via Railway backend
-      fetch(`https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}`)
+      fetch(`https://radiant-integrity-production.up.railway.app/api/auth/discord`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: code,
+          redirect_uri: window.location.hostname === "localhost"
+            ? "http://localhost:3000/auth/discord/callback"
+            : "https://pimek5.github.io/HEXRTBRXENCHROMAS/auth/discord/callback.html"
+        })
+      })
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
