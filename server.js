@@ -1,6 +1,3 @@
-app.get('/auth/discord/callback', (req, res) => {
-  res.send('Callback received. You can close this tab.');
-});
 require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
@@ -10,6 +7,10 @@ app.use(cors());
 const CLIENT_ID = '1274276113660645389';
 const CLIENT_SECRET = process.env.CLIENT_SECRET; // Discord app secret from environment variable
 const REDIRECT_URI = 'https://la988z3j.up.railway.app/auth/discord/callback'; // Railway production callback
+
+app.get('/auth/discord/callback', (req, res) => {
+  res.send('Callback received. You can close this tab.');
+});
 
 app.get('/api/auth/discord', async (req, res) => {
   const code = req.query.code;
