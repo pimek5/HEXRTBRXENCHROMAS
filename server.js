@@ -1,28 +1,128 @@
 const express = require('express');
+const cors = require('cors');
+const axios = require('axios');
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-console.log('STARTING SERVER');
+console.log('🚀 Discord OAuth Server Starting...');
+console.log('PORT:', PORT);
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', '*');
-  res.header('Access-Control-Allow-Headers', '*');
-  next();
-});
+// Enable CORS for all origins
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
+app.use(express.json());
+
+// Discord configuration
+const CLIENT_ID = '1274276113660645389';
+const CLIENT_SECRET = process.env.CLIENT_SECRET;
+
+console.log('CLIENT_ID:', CLIENT_ID);
+console.log('CLIENT_SECRET configured:', !!CLIENT_SECRET);
+
+// Root route
 app.get('/', (req, res) => {
-  console.log('ROOT REQUEST');
-  res.json({ message: 'Server is alive!', timestamp: new Date().toISOString() });
+  res.json({
+    service: 'Discord OAuth Server',
+    status: 'running',
+    version: '5.0.0',
+    timestamp: new Date().toISOString()
+  });
 });
 
+// Health check
 app.get('/health', (req, res) => {
-  console.log('HEALTH REQUEST');
-  res.json({ status: 'ok', version: '4.0.0' });
+  res.json({
+    status: 'healthy',
+    client_secret: !!CLIENT_SECRET,
+    timestamp: new Date().toISOString()
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`SERVER RUNNING ON ${PORT}`);
+// Discord OAuth endpoint
+app.get('/api/auth/discord', async (req, res) => {
+  console.log('📞 Discord OAuth request received');
+  console.log('Query params:', req.query);
+  
+  const { code, redirect_uri } = req.query;
+  
+  if (!code) {
+    console.log('❌ Missing authorization code');
+    return res.status(400).json({ error: 'Missing authorization code' });
+  }
+  
+  if (!CLIENT_SECRET) {
+    console.log('❌ Missing client secret');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+  
+  try {
+    console.log('🔄 Exchanging code for token...');
+    
+    const tokenResponse = await axios.post('https://discord.com/api/v10/oauth2/token', {
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET,
+      grant_type: 'authorization_code',
+      code: code,
+      redirect_uri: redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/'
+    }, {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+    
+    console.log('✅ Token received, fetching user...');
+    const { access_token, token_type } = tokenResponse.data;
+    
+    const userResponse = await axios.get('https://discord.com/api/v10/users/@me', {
+      headers: {
+        'Authorization': `${token_type} ${access_token}`
+      }
+    });
+    
+    const user = userResponse.data;
+    console.log('✅ User authenticated:', user.username);
+    
+    res.json({
+      id: user.id,
+      username: user.username,
+      discriminator: user.discriminator,
+      avatar: user.avatar,
+      email: user.email,
+      verified: user.verified
+    });
+    
+  } catch (error) {
+    console.error('❌ OAuth error:', error.response?.data || error.message);
+    res.status(500).json({
+      error: 'Authentication failed',
+      details: error.response?.data || error.message
+    });
+  }
+});
+
+// Catch-all for unknown routes
+app.use((req, res) => {
+  console.log('⚠️  Unknown route:', req.method, req.path);
+  res.status(404).json({
+    error: 'Route not found',
+    path: req.path,
+    method: req.method
+  });
+});
+
+// Start server
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🎯 Server running on http://0.0.0.0:${PORT}`);
+  console.log('📋 Available endpoints:');
+  console.log('   GET / - Service info');
+  console.log('   GET /health - Health check');
+  console.log('   GET /api/auth/discord - Discord OAuth');
 });
 
 // Health check endpoint
