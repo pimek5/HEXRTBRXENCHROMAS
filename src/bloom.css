@@ -1,0 +1,39 @@
+/* Bloom effect for text and button hover */
+.bloom:hover {
+  filter: drop-shadow(0 0 16px currentColor) brightness(1.5);
+  transition: filter 0.3s;
+}
+
+/* Logo hover group for icon animation */
+.logo-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.logo-group .logo {
+  cursor: pointer;
+}
+.logo-group .icon-row {
+  display: flex;
+  align-items: center;
+  margin-left: 0.5rem;
+}
+.logo-group .icon-row .twitter-icon,
+.logo-group .icon-row .discord-icon {
+  opacity: 0;
+  transform: translateX(-40px);
+  pointer-events: none;
+  transition: all 0.5s;
+}
+.logo-group:hover .icon-row .twitter-icon {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  transition-delay: 0.1s;
+}
+.logo-group:hover .icon-row .discord-icon {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+  transition-delay: 0.2s;
+}
