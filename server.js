@@ -48,6 +48,7 @@ app.get('/health', (req, res) => {
 app.get('/api/auth/discord', async (req, res) => {
   console.log('📞 Discord OAuth request received');
   console.log('Query params:', req.query);
+  console.log('Headers:', req.headers);
   
   const { code, redirect_uri } = req.query;
   
@@ -58,25 +59,36 @@ app.get('/api/auth/discord', async (req, res) => {
   
   if (!CLIENT_SECRET) {
     console.log('❌ Missing client secret');
-    return res.status(500).json({ error: 'Server configuration error' });
+    console.log('Available env vars:', Object.keys(process.env).filter(key => key.includes('CLIENT')));
+    return res.status(500).json({ 
+      error: 'Server configuration error - missing CLIENT_SECRET',
+      available_env: Object.keys(process.env).filter(key => key.includes('CLIENT'))
+    });
   }
   
   try {
     console.log('🔄 Exchanging code for token...');
+    console.log('Using CLIENT_ID:', CLIENT_ID);
+    console.log('Using redirect_uri:', redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/');
     
-    const tokenResponse = await axios.post('https://discord.com/api/v10/oauth2/token', {
+    const tokenPayload = {
       client_id: CLIENT_ID,
       client_secret: CLIENT_SECRET,
       grant_type: 'authorization_code',
       code: code,
       redirect_uri: redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/'
-    }, {
+    };
+    
+    console.log('Token payload:', { ...tokenPayload, client_secret: '[HIDDEN]' });
+    
+    const tokenResponse = await axios.post('https://discord.com/api/v10/oauth2/token', 
+      new URLSearchParams(tokenPayload), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
     
-    console.log('✅ Token received, fetching user...');
+    console.log('✅ Token received, status:', tokenResponse.status);
     const { access_token, token_type } = tokenResponse.data;
     
     const userResponse = await axios.get('https://discord.com/api/v10/users/@me', {
@@ -86,22 +98,28 @@ app.get('/api/auth/discord', async (req, res) => {
     });
     
     const user = userResponse.data;
-    console.log('✅ User authenticated:', user.username);
+    console.log('✅ User authenticated:', user.username, '#' + user.discriminator);
     
-    res.json({
+    const response = {
       id: user.id,
       username: user.username,
       discriminator: user.discriminator,
       avatar: user.avatar,
       email: user.email,
       verified: user.verified
-    });
+    };
+    
+    console.log('📤 Sending user data to frontend');
+    res.json(response);
     
   } catch (error) {
     console.error('❌ OAuth error:', error.response?.data || error.message);
+    console.error('Full error:', error);
+    
     res.status(500).json({
       error: 'Authentication failed',
-      details: error.response?.data || error.message
+      details: error.response?.data || error.message,
+      step: error.response ? 'discord_api' : 'network'
     });
   }
 });

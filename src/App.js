@@ -170,50 +170,36 @@ function App() {
         ? "http://localhost:3000/"
         : "https://pimek5.github.io/HEXRTBRXENCHROMAS/";
 
-      // Try multiple backend endpoints
-      const backendUrls = [
-        `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`,
-        `https://radiant-integrity-production.up.railway.app/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`
-      ];
-
-      const tryBackend = async (urls, index = 0) => {
-        if (index >= urls.length) {
-          throw new Error('All backend endpoints failed');
-        }
-
-        const url = urls[index];
-        console.log(`Trying backend ${index + 1}/${urls.length}:`, url);
-
-        try {
-          const response = await fetch(url);
-          console.log(`Backend ${index + 1} response status:`, response.status);
+      // Real Discord OAuth - no simulation
+      const backendUrl = `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      console.log('Discord OAuth - exchanging code for user data...');
+      console.log('Backend URL:', backendUrl);
+      
+      fetch(backendUrl)
+        .then(res => {
+          console.log('Discord OAuth response status:', res.status);
+          if (!res.ok) {
+            return res.text().then(text => {
+              console.error('Discord OAuth error response:', text);
+              throw new Error(`Discord OAuth failed: ${res.status} - ${text}`);
+            });
+          }
+          return res.json();
+        })
+        .then(userData => {
+          console.log('Discord OAuth success! User data:', userData);
           
-          if (response.ok) {
-            return await response.json();
-          } else {
-            console.log(`Backend ${index + 1} failed with status ${response.status}, trying next...`);
-            return await tryBackend(urls, index + 1);
-          }
-        } catch (error) {
-          console.log(`Backend ${index + 1} error:`, error.message, 'trying next...');
-          return await tryBackend(urls, index + 1);
-        }
-      };
-
-      tryBackend(backendUrls)
-        .then(data => {
-          console.log('Discord auth response:', data);
-          if (data.error) {
-            throw new Error(data.error);
-          }
-          setUser(data);
-          localStorage.setItem('discord_user', JSON.stringify(data));
+          // Store real Discord user data
+          setUser(userData);
+          localStorage.setItem('discord_user', JSON.stringify(userData));
           setAuthError(null);
           window.history.replaceState({}, document.title, window.location.pathname);
+          
+          console.log(`✅ User logged in: ${userData.username}#${userData.discriminator}`);
         })
         .catch(error => {
-          console.error('Discord auth error:', error);
-          setAuthError('Failed to authenticate with Discord. Please try again.');
+          console.error('Discord OAuth error:', error);
+          setAuthError(`Discord login failed: ${error.message}`);
           window.history.replaceState({}, document.title, window.location.pathname);
         })
         .finally(() => {
