@@ -49,6 +49,111 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Discord OAuth token exchange endpoint (GET method for compatibility)
+app.get('/api/auth/discord', async (req, res) => {
+  const startTime = Date.now();
+  
+  try {
+    const { code } = req.query;
+    const redirect_uri = req.query.redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/auth/discord/callback.html';
+    
+    // Validate request
+    if (!code) {
+      console.error('❌ No authorization code provided');
+      return res.status(400).json({ error: 'Authorization code is required' });
+    }
+
+    if (!DISCORD_CLIENT_SECRET) {
+      console.error('❌ Discord client secret not configured');
+      return res.status(500).json({ error: 'Discord client secret not configured' });
+    }
+
+    console.log(`🔄 Processing Discord OAuth for redirect URI: ${redirect_uri}`);
+    console.log(`🔄 Authorization code: ${code.substring(0, 10)}...`);
+
+    // Exchange code for access token
+    console.log('📡 Exchanging code for access token...');
+    const tokenResponse = await axios.post(`${DISCORD_API_BASE}/oauth2/token`, 
+      new URLSearchParams({
+        client_id: DISCORD_CLIENT_ID,
+        client_secret: DISCORD_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code: code,
+        redirect_uri: redirect_uri
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        timeout: 10000
+      }
+    );
+
+    const { access_token, token_type } = tokenResponse.data;
+    console.log(`✅ Access token obtained: ${access_token.substring(0, 10)}...`);
+
+    // Fetch user information
+    console.log('👤 Fetching user information...');
+    const userResponse = await axios.get(`${DISCORD_API_BASE}/users/@me`, {
+      headers: {
+        'Authorization': `${token_type} ${access_token}`
+      },
+      timeout: 10000
+    });
+
+    const user = userResponse.data;
+    console.log(`✅ User authenticated: ${user.username}#${user.discriminator} (ID: ${user.id})`);
+
+    // Return user data (same format as localStorage expects)
+    const processingTime = Date.now() - startTime;
+    res.json({ 
+      id: user.id,
+      username: user.username,
+      discriminator: user.discriminator,
+      avatar: user.avatar,
+      email: user.email,
+      verified: user.verified,
+      processing_time_ms: processingTime
+    });
+
+  } catch (error) {
+    const processingTime = Date.now() - startTime;
+    console.error('❌ Discord OAuth error:', error.message);
+    
+    if (error.response) {
+      console.error('Discord API Response:', {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        data: error.response.data
+      });
+      
+      if (error.response.status === 400 && error.response.data?.error === 'invalid_grant') {
+        return res.status(400).json({ 
+          error: 'Invalid or expired authorization code. Please try logging in again.',
+          processing_time_ms: processingTime
+        });
+      }
+      
+      return res.status(error.response.status).json({ 
+        error: error.response.data?.error_description || error.response.data?.error || 'Discord API error',
+        processing_time_ms: processingTime
+      });
+    }
+    
+    if (error.code === 'ECONNABORTED') {
+      return res.status(408).json({ 
+        error: 'Request timeout. Please try again.',
+        processing_time_ms: processingTime
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'Internal server error during Discord authentication',
+      processing_time_ms: processingTime
+    });
+  }
+});
+
 // Discord OAuth token exchange endpoint
 app.post('/api/auth/discord', async (req, res) => {
   const startTime = Date.now();
