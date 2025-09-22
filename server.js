@@ -11,11 +11,26 @@ const PORT = process.env.PORT || 3001;
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://pimek5.github.io'
+    'https://pimek5.github.io',
+    'https://pimek5.github.io/HEXRTBRXENCHROMAS'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
+
+// Additional CORS headers for preflight requests
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.sendStatus(200);
+  } else {
+    next();
+  }
+});
 
 // Serve static files from the React app build directory
 app.use(express.static(path.join(__dirname, 'build')));
@@ -286,6 +301,12 @@ app.get('/auth/discord/callback', (req, res) => {
   
   console.error('❌ No code or error in callback');
   res.redirect('/?error=invalid_callback');
+});
+
+// API route not found handler
+app.use('/api/*', (req, res) => {
+  console.log(`❌ API route not found: ${req.method} ${req.path}`);
+  res.status(404).json({ error: `API endpoint not found: ${req.path}` });
 });
 
 // Catch all handler: send back React's index.html file for client-side routing
