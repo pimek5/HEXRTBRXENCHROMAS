@@ -60,7 +60,20 @@ app.get('/health', (req, res) => {
     status: 'ok', 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    discord_client_configured: !!DISCORD_CLIENT_SECRET
+    discord_client_configured: !!DISCORD_CLIENT_SECRET,
+    version: '1.0.2'
+  });
+});
+
+// Test endpoint
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'API is working!',
+    timestamp: new Date().toISOString(),
+    env_check: {
+      client_id: !!DISCORD_CLIENT_ID,
+      client_secret: !!DISCORD_CLIENT_SECRET
+    }
   });
 });
 
@@ -329,6 +342,13 @@ app.listen(PORT, () => {
   
   if (!DISCORD_CLIENT_SECRET) {
     console.warn('⚠️  Warning: Discord Client Secret not set. OAuth will not work.');
-    console.log('   Set DISCORD_CLIENT_SECRET environment variable to enable authentication.');
+    console.log('   Set CLIENT_SECRET environment variable to enable authentication.');
   }
+  
+  // Log registered routes
+  console.log('📍 Registered routes:');
+  console.log('   GET /health');
+  console.log('   GET /api/test');
+  console.log('   GET /api/auth/discord');
+  console.log('   POST /api/auth/discord');
 });
