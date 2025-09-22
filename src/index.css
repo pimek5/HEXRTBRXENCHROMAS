@@ -1,0 +1,179 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0f1419;
+  color: #c9aa71;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.App {
+  text-align: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f1419 0%, #1e2328 100%);
+}
+
+.header {
+  background-color: #1e2328;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+  height: 40px;
+  pointer-events: none;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #c8aa6e;
+  margin: 0;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.subtitle {
+  color: #a09b8c;
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+.login-section {
+  margin: 40px 0;
+  padding: 20px;
+}
+
+.discord-login-btn {
+  background: linear-gradient(45deg, #5865F2, #7289DA);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+}
+
+.discord-login-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(88, 101, 242, 0.4);
+}
+
+.discord-login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.user-info {
+  background-color: #1e2328;
+  padding: 20px;
+  border-radius: 10px;
+  margin: 20px auto;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 15px;
+  border: 3px solid #c8aa6e;
+}
+
+.user-name {
+  font-size: 1.5rem;
+  margin: 10px 0;
+  color: #c8aa6e;
+}
+
+.user-id {
+  color: #a09b8c;
+  font-size: 0.9rem;
+}
+
+.logout-btn {
+  background: linear-gradient(45deg, #dc2626, #ef4444);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+}
+
+.loading {
+  color: #c8aa6e;
+  font-size: 1.2rem;
+  margin: 20px 0;
+}
+
+.error {
+  color: #dc2626;
+  background-color: #fef2f2;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 20px auto;
+  max-width: 500px;
+  border-left: 4px solid #dc2626;
+}
+
+.content {
+  padding: 40px 20px;
+}
+
+.description {
+  max-width: 800px;
+  margin: 0 auto;
+  line-height: 1.6;
+  color: #a09b8c;
+  font-size: 1.1rem;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin: 40px auto;
+  max-width: 1200px;
+  padding: 0 20px;
+}
+
+.feature-card {
+  background-color: #1e2328;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+}
+
+.feature-title {
+  color: #c8aa6e;
+  font-size: 1.4rem;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.feature-description {
+  color: #a09b8c;
+  line-height: 1.5;
+}
