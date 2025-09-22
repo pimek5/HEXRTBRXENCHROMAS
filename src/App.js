@@ -170,24 +170,48 @@ function App() {
         ? "http://localhost:3000/"
         : "https://pimek5.github.io/HEXRTBRXENCHROMAS/";
 
-      // Real Discord OAuth - no simulation
-      const backendUrl = `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-      console.log('Discord OAuth - exchanging code for user data...');
-      console.log('Backend URL:', backendUrl);
+      // Try multiple backend services for reliability
+      const backendUrls = [
+        `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`,
+        `https://hexrtbrxenchromas.vercel.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`
+      ];
+
+      console.log('Discord OAuth - trying multiple backends...');
       
-      fetch(backendUrl)
-        .then(res => {
-          console.log('Discord OAuth response status:', res.status);
-          if (!res.ok) {
-            return res.text().then(text => {
-              console.error('Discord OAuth error response:', text);
-              throw new Error(`Discord OAuth failed: ${res.status} - ${text}`);
-            });
+      const tryBackends = async () => {
+        let lastError;
+        
+        for (let i = 0; i < backendUrls.length; i++) {
+          const url = backendUrls[i];
+          const serviceName = url.includes('railway') ? 'Railway' : 'Vercel';
+          
+          try {
+            console.log(`🔄 Trying ${serviceName}: ${url}`);
+            
+            const response = await fetch(url);
+            console.log(`${serviceName} response status:`, response.status);
+            
+            if (response.ok) {
+              const userData = await response.json();
+              console.log(`✅ ${serviceName} success! User:`, userData.username);
+              return userData;
+            } else {
+              const errorText = await response.text();
+              console.log(`❌ ${serviceName} failed:`, response.status, errorText);
+              lastError = new Error(`${serviceName} failed: ${response.status}`);
+            }
+          } catch (error) {
+            console.log(`❌ ${serviceName} error:`, error.message);
+            lastError = error;
           }
-          return res.json();
-        })
+        }
+        
+        throw lastError || new Error('All backends failed');
+      };
+
+      tryBackends()
         .then(userData => {
-          console.log('Discord OAuth success! User data:', userData);
+          console.log('Discord OAuth SUCCESS! User data:', userData);
           
           // Store real Discord user data
           setUser(userData);

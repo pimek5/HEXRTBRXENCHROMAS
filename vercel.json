@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/auth/discord.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
