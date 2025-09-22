@@ -173,7 +173,7 @@ function App() {
       // Try multiple backend services for reliability
       const backendUrls = [
         `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`,
-        `https://my-q8ttudmco-pimek5s-projects.vercel.app/api/discord-auth?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`
+        `https://my-q2g1qy19v-pimek5s-projects.vercel.app/api/discord-auth?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`
       ];
 
       console.log('Discord OAuth - trying multiple backends...');
