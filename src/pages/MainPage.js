@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import '../bloom.css';
 import logo from "../Download.png";
 import bgImage from "../87febddd0466e384f137a6abd328e19c9.jpg";
-import LoginModal from '../LoginModal';
 
 // Snow particle component
 function DotParticles() {
@@ -106,16 +105,6 @@ function DotParticles() {
 
 const MainPage = () => {
   const navigate = useNavigate();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [user, setUser] = useState(() => {
-    // Try to load user from localStorage on app start
-    try {
-      const savedUser = localStorage.getItem('discord_user');
-      return savedUser ? JSON.parse(savedUser) : null;
-    } catch {
-      return null;
-    }
-  });
 
   // Discover Mods animation hooks
   const mods = [
@@ -153,19 +142,6 @@ const MainPage = () => {
     }, 1200);
     return () => clearInterval(interval);
   }, [mods.length]);
-
-  const handleLogin = (userData) => {
-    setUser(userData);
-    localStorage.setItem('discord_user', JSON.stringify(userData));
-    setShowLoginModal(false);
-    // After login, redirect to homepage
-    navigate('/homepage');
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('discord_user');
-  };
 
   return (
     <div className="min-h-screen text-white relative overflow-hidden"
@@ -227,37 +203,14 @@ const MainPage = () => {
           </button>
         </div>
 
-        {/* Login/User Section */}
+        {/* Simple Enter Site Button */}
         <div className="flex items-center space-x-4">
-          {user ? (
-            <div className="flex items-center space-x-3">
-              <img 
-                src={user.avatar_url} 
-                alt="Avatar" 
-                className="w-8 h-8 rounded-full"
-              />
-              <span className="text-white">{user.username}</span>
-              <button 
-                onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm transition-colors"
-              >
-                Logout
-              </button>
-              <button 
-                onClick={() => navigate('/homepage')}
-                className="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm transition-colors"
-              >
-                Enter Site
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={() => setShowLoginModal(true)}
-              className="bg-transparent border border-white hover:bg-white hover:text-black px-4 py-2 rounded transition-all"
-            >
-              Login
-            </button>
-          )}
+          <button 
+            onClick={() => navigate('/homepage')}
+            className="bg-transparent border border-white hover:bg-white hover:text-black px-4 py-2 rounded transition-all"
+          >
+            Enter Site
+          </button>
         </div>
       </nav>
 
@@ -274,29 +227,18 @@ const MainPage = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-6 justify-center">
-          {user ? (
-            <button 
-              onClick={() => navigate('/homepage')}
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-12 py-4 rounded-lg text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
-            >
-              Enter Site →
-            </button>
-          ) : (
-            <>
-              <button 
-                onClick={() => setShowLoginModal(true)}
-                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-12 py-4 rounded-lg text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
-              >
-                Login to Continue →
-              </button>
-              <button 
-                onClick={() => navigate('/homepage')}
-                className="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white px-12 py-4 rounded-lg text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
-              >
-                Browse as Guest
-              </button>
-            </>
-          )}
+          <button 
+            onClick={() => navigate('/homepage')}
+            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-12 py-4 rounded-lg text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
+          >
+            Enter Site →
+          </button>
+          <button 
+            onClick={() => navigate('/explore')}
+            className="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white px-12 py-4 rounded-lg text-xl font-semibold transition-all transform hover:scale-105 shadow-lg"
+          >
+            Browse Mods
+          </button>
         </div>
       </div>
 
@@ -353,13 +295,6 @@ const MainPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Login Modal */}
-      <LoginModal 
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onLogin={handleLogin}
-      />
     </div>
   );
 };
