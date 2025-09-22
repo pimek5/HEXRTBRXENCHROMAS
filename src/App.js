@@ -171,14 +171,23 @@ function App() {
         : "https://pimek5.github.io/HEXRTBRXENCHROMAS/";
 
       // Exchange code for user info via Railway backend
-      fetch(`https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`)
+      const requestUrl = `https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+      console.log('Making Discord auth request to:', requestUrl);
+      
+      fetch(requestUrl)
         .then(res => {
+          console.log('Response status:', res.status);
+          console.log('Response headers:', res.headers);
           if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
+            return res.text().then(text => {
+              console.error('Response body:', text);
+              throw new Error(`HTTP error! status: ${res.status}, body: ${text}`);
+            });
           }
           return res.json();
         })
         .then(data => {
+          console.log('Discord auth response:', data);
           if (data.error) {
             throw new Error(data.error);
           }

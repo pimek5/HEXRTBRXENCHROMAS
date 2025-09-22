@@ -57,6 +57,10 @@ app.get('/api/auth/discord', async (req, res) => {
     const { code } = req.query;
     const redirect_uri = req.query.redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/';
     
+    console.log('🔧 Environment check:');
+    console.log(`  CLIENT_ID: ${DISCORD_CLIENT_ID ? 'SET' : 'NOT SET'}`);
+    console.log(`  CLIENT_SECRET: ${DISCORD_CLIENT_SECRET ? 'SET' : 'NOT SET'}`);
+    
     // Validate request
     if (!code) {
       console.error('❌ No authorization code provided');
