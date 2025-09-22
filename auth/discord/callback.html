@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Auth Callback</title>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            max-width: 400px;
+            padding: 2rem;
+            background: #2a2833;
+            border-radius: 8px;
+        }
+        .loading {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="loading">Processing Discord Authentication...</h2>
+        <p>You will be redirected back to the main page shortly.</p>
+    </div>
+
+    <script>
+        // Extract code from URL and redirect back to main app
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+        
+        if (code) {
+            // Redirect back to main page with the code
+            window.location.href = `../../index.html?code=${code}`;
+        } else {
+            // If no code, redirect to main page
+            setTimeout(() => {
+                window.location.href = '../../index.html';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
