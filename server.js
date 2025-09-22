@@ -1,122 +1,28 @@
 const express = require('express');
-const cors = require('cors');
-const axios = require('axios');
-
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-console.log('=== SERVER STARTING ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('PORT:', PORT);
+console.log('STARTING SERVER');
 
-// Simple CORS
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', '*');
+  res.header('Access-Control-Allow-Headers', '*');
+  next();
+});
 
-app.use(express.json());
+app.get('/', (req, res) => {
+  console.log('ROOT REQUEST');
+  res.json({ message: 'Server is alive!', timestamp: new Date().toISOString() });
+});
 
-// Discord OAuth configuration
-const CLIENT_ID = '1274276113660645389';
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
-
-console.log('CLIENT_ID:', CLIENT_ID);
-console.log('CLIENT_SECRET configured:', !!CLIENT_SECRET);
-
-// Health endpoint
 app.get('/health', (req, res) => {
-  console.log('=== HEALTH CHECK ===');
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    client_secret_configured: !!CLIENT_SECRET,
-    version: '3.0.0'
-  });
-});
-
-// Test endpoint
-app.get('/api/test', (req, res) => {
-  console.log('=== API TEST ===');
-  res.json({ 
-    message: 'API working!', 
-    timestamp: new Date().toISOString(),
-    env: {
-      client_id: !!CLIENT_ID,
-      client_secret: !!CLIENT_SECRET
-    }
-  });
-});
-
-// Discord OAuth endpoint
-app.get('/api/auth/discord', async (req, res) => {
-  console.log('=== DISCORD OAUTH ===');
-  console.log('Query:', req.query);
-  
-  const { code, redirect_uri } = req.query;
-  
-  if (!code) {
-    console.log('ERROR: No code');
-    return res.status(400).json({ error: 'No code' });
-  }
-  
-  if (!CLIENT_SECRET) {
-    console.log('ERROR: No client secret');
-    return res.status(500).json({ error: 'No client secret' });
-  }
-  
-  try {
-    console.log('Exchanging code...');
-    
-    const tokenResponse = await axios.post('https://discord.com/api/v10/oauth2/token', 
-      new URLSearchParams({
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
-        grant_type: 'authorization_code',
-        code: code,
-        redirect_uri: redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/'
-      }),
-      { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
-    );
-
-    console.log('Token response status:', tokenResponse.status);
-    const { access_token, token_type } = tokenResponse.data;
-
-    const userResponse = await axios.get('https://discord.com/api/v10/users/@me', {
-      headers: { 'Authorization': `${token_type} ${access_token}` }
-    });
-
-    const user = userResponse.data;
-    console.log('SUCCESS: User', user.username);
-
-    res.json({
-      id: user.id,
-      username: user.username,
-      discriminator: user.discriminator,
-      avatar: user.avatar,
-      email: user.email,
-      verified: user.verified
-    });
-
-  } catch (error) {
-    console.error('OAUTH ERROR:', error.response?.data || error.message);
-    res.status(500).json({ error: 'Auth failed', details: error.response?.data });
-  }
-});
-
-// 404 handler
-app.use('*', (req, res) => {
-  console.log('404:', req.method, req.originalUrl);
-  res.status(404).json({ error: '404 Not Found', path: req.originalUrl });
+  console.log('HEALTH REQUEST');
+  res.json({ status: 'ok', version: '4.0.0' });
 });
 
 app.listen(PORT, () => {
-  console.log('=== SERVER READY ===');
-  console.log(`Port: ${PORT}`);
-  console.log(`Health: /health`);
-  console.log(`Test: /api/test`);
-  console.log(`OAuth: /api/auth/discord`);
+  console.log(`SERVER RUNNING ON ${PORT}`);
 });
 
 // Health check endpoint
