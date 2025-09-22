@@ -1,6 +1,6 @@
 {
   "functions": {
-    "api/auth/discord.js": {
+    "api/discord-auth.js": {
       "runtime": "nodejs18.x"
     }
   }
