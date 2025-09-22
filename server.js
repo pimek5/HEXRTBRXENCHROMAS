@@ -426,10 +426,10 @@ app.use((error, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔧 Discord Client ID: ${DISCORD_CLIENT_ID}`);
-  console.log(`🔐 Discord Client Secret: ${DISCORD_CLIENT_SECRET ? 'configured' : 'NOT CONFIGURED'}`);
+  console.log(`🔧 Discord Client ID: ${CLIENT_ID}`);
+  console.log(`🔐 Discord Client Secret: ${CLIENT_SECRET ? 'configured' : 'NOT CONFIGURED'}`);
   
-  if (!DISCORD_CLIENT_SECRET) {
+  if (!CLIENT_SECRET) {
     console.warn('⚠️  Warning: Discord Client Secret not set. OAuth will not work.');
     console.log('   Set CLIENT_SECRET environment variable to enable authentication.');
   }
