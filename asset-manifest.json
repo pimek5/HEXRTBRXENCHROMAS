@@ -1,17 +1,13 @@
 {
   "files": {
-    "main.css": "/HEXRTBRXENCHROMAS/static/css/main.9dbf2334.css",
-    "main.js": "/HEXRTBRXENCHROMAS/static/js/main.644b194c.js",
-    "static/js/453.96453769.chunk.js": "/HEXRTBRXENCHROMAS/static/js/453.96453769.chunk.js",
-    "static/media/Download.png": "/HEXRTBRXENCHROMAS/static/media/Download.4bf1c79c38c90f59ac24.png",
-    "static/media/9.jpg": "/HEXRTBRXENCHROMAS/static/media/87febddd0466e384f137a6abd328e19c9.b05af53a497939f590da.jpg",
+    "main.css": "/HEXRTBRXENCHROMAS/static/css/main.4c95f88b.css",
+    "main.js": "/HEXRTBRXENCHROMAS/static/js/main.ed93124a.js",
     "index.html": "/HEXRTBRXENCHROMAS/index.html",
-    "main.9dbf2334.css.map": "/HEXRTBRXENCHROMAS/static/css/main.9dbf2334.css.map",
-    "main.644b194c.js.map": "/HEXRTBRXENCHROMAS/static/js/main.644b194c.js.map",
-    "453.96453769.chunk.js.map": "/HEXRTBRXENCHROMAS/static/js/453.96453769.chunk.js.map"
+    "main.4c95f88b.css.map": "/HEXRTBRXENCHROMAS/static/css/main.4c95f88b.css.map",
+    "main.ed93124a.js.map": "/HEXRTBRXENCHROMAS/static/js/main.ed93124a.js.map"
   },
   "entrypoints": [
-    "static/css/main.9dbf2334.css",
-    "static/js/main.644b194c.js"
+    "static/css/main.4c95f88b.css",
+    "static/js/main.ed93124a.js"
   ]
 }
