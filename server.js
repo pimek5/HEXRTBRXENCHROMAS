@@ -21,7 +21,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'build')));
 
 // Environment validation
-const requiredEnvVars = ['DISCORD_CLIENT_ID', 'DISCORD_CLIENT_SECRET'];
+const requiredEnvVars = ['CLIENT_ID', 'CLIENT_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(varName => !process.env[varName]);
 
 if (missingEnvVars.length > 0) {
@@ -35,8 +35,8 @@ if (missingEnvVars.length > 0) {
 }
 
 // Discord OAuth configuration
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1274276113660645389';
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const DISCORD_CLIENT_ID = process.env.CLIENT_ID || '1274276113660645389';
+const DISCORD_CLIENT_SECRET = process.env.CLIENT_SECRET;
 const DISCORD_API_BASE = 'https://discord.com/api/v10';
 
 // Health check endpoint
