@@ -148,7 +148,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [authError, setAuthError] = useState(null);
 
-  // Check for code in URL and fetch Discord user info
+  // Check for code in URL and fetch user info
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
@@ -164,8 +164,14 @@ function App() {
       setIsLoading(true);
       setAuthError(null);
 
+      // Determine redirect URI
+      const isLocal = window.location.hostname === "localhost";
+      const redirectUri = isLocal
+        ? "http://localhost:3000/"
+        : "https://pimek5.github.io/HEXRTBRXENCHROMAS/";
+
       // Exchange code for user info via Railway backend
-      fetch(`https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}`)
+      fetch(`https://radiant-integrity-production.up.railway.app/api/auth/discord?code=${code}&redirect_uri=${encodeURIComponent(redirectUri)}`)
         .then(res => {
           if (!res.ok) {
             throw new Error(`HTTP error! status: ${res.status}`);
@@ -263,9 +269,9 @@ function App() {
                       setAuthError(null);
                       const isLocal = window.location.hostname === "localhost";
                       const redirectUri = isLocal
-                        ? "http://localhost:3000/auth/discord/callback"
-                        : "https://pimek5.github.io/HEXRTBRXENCHROMAS/auth/discord/callback.html";
-                      const clientId = process.env.REACT_APP_CLIENT_ID || '1274276113660645389';
+                        ? "http://localhost:3000/"
+                        : "https://pimek5.github.io/HEXRTBRXENCHROMAS/";
+                      const clientId = '1274276113660645389';
                       const oauthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify`;
                       window.location.href = oauthUrl;
                     }}

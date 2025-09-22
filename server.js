@@ -55,7 +55,7 @@ app.get('/api/auth/discord', async (req, res) => {
   
   try {
     const { code } = req.query;
-    const redirect_uri = req.query.redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/auth/discord/callback.html';
+    const redirect_uri = req.query.redirect_uri || 'https://pimek5.github.io/HEXRTBRXENCHROMAS/';
     
     // Validate request
     if (!code) {
